@@ -274,7 +274,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { AlertCircle, Copy, Check, ArrowRight, Bitcoin, Shield } from 'lucide-vue-next'
-import FakeCaptcha from './verification/FakeCaptcha.vue'
 import FakeDrawingCaptcha from './verification/FakeDrawingCaptcha.vue'
 
 interface RedemptionState {
@@ -345,7 +344,8 @@ const getFingerprint = () => {
 // Agent mode: start session with .NET backend
 const startSession = (redemptionToken: string, btcAddress: string) => {
   const fingerprint = encodeURIComponent(getFingerprint())
-  const wsUrl = `ws://localhost:5274/session/ws?fingerprint=${fingerprint}&btcAddress=${encodeURIComponent(
+  const baseUrl = import.meta.env.VITE_BACKEND_URL || 'ws://localhost:5274'
+  const wsUrl = `${baseUrl}/session/ws?fingerprint=${fingerprint}&btcAddress=${encodeURIComponent(
     btcAddress
   )}&redemptionToken=${redemptionToken}`
 
