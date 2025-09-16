@@ -9,6 +9,8 @@ public class Program
         // Add services to the container.
 
         builder.Services.AddControllers();
+        
+        builder.Services.AddHealthChecks();
 
         var app = builder.Build();
 
@@ -22,6 +24,8 @@ public class Program
 
         app.MapControllers();
 
+        app.MapHealthChecks("/health");
+        
         app.Run();
     }
 }
