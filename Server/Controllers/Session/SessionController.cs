@@ -169,6 +169,13 @@ namespace Server.Controllers.Session
 
         private async Task<(bool isValid, Guid sessionId)> ValidateSessionAsync(string ipAddress, string fingerprint, int redemptionToken)
         {
+            var callCenterService = Environment.GetEnvironmentVariable("CALLCENTERSERVICE");
+            if (string.IsNullOrWhiteSpace(callCenterService))
+            {
+                _logger.LogError("CALLCENTERSERVICE environment variable not set");
+                return (false, Guid.Empty);
+            }
+
             using HttpClient httpClient = new();
             var response = await httpClient.PostAsync($"http://localhost:5008/Session/start?redemptionToken={redemptionToken}&sessionType=Web&sessionFingerprint={fingerprint}&sessionIpAddress={ipAddress}", null);
             if (!response.IsSuccessStatusCode)
