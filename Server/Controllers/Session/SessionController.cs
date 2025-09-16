@@ -177,12 +177,7 @@ namespace Server.Controllers.Session
             }
 
             using HttpClient httpClient = new();
-            var baseUrl = Environment.GetEnvironmentVariable("CALLCENTERSERVICE");
-            
-            if(baseUrl == null)
-                baseUrl = "http://localhost:5008";
-            
-            var response = await httpClient.PostAsync($"{baseUrl}/Session/start?redemptionToken={redemptionToken}&sessionType=Web&sessionFingerprint={fingerprint}&sessionIpAddress={ipAddress}", null);
+            var response = await httpClient.PostAsync($"{callCenterService}/Session/start?redemptionToken={redemptionToken}&sessionType=Web&sessionFingerprint={fingerprint}&sessionIpAddress={ipAddress}", null);
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError($"Error starting session: {response.StatusCode} | {response.ReasonPhrase}");
