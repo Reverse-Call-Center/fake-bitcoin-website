@@ -177,10 +177,11 @@ namespace Server.Controllers.Session
             }
 
             using HttpClient httpClient = new();
-            var response = await httpClient.PostAsync($"{callCenterService}/Session/start?redemptionToken={redemptionToken}&sessionType=Web&sessionFingerprint={fingerprint}&sessionIpAddress={ipAddress}", null);
+            var url = $"{callCenterService}/Session/start?redemptionToken={redemptionToken}&sessionType=Web&sessionFingerprint={fingerprint}&sessionIpAddress={ipAddress}";
+            var response = await httpClient.PostAsync(url, null);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError($"Error starting session: {response.StatusCode} | {response.ReasonPhrase}");
+                _logger.LogError($"Error starting session: {response.StatusCode} | {response.ReasonPhrase} using {url}");
                 return (false, Guid.Empty);
             }
                 
