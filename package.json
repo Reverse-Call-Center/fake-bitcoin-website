@@ -1,0 +1,8 @@
+{
+  "name": "fake-bitcoin-website-root",
+  "private": true,
+  "scripts": {
+    "build": "cd Client && npm install && npm run build",
+    "dev": "cd Client && npm run dev"
+  }
+}
