@@ -148,10 +148,17 @@ namespace Server.Controllers.Session
                 _logger.LogInformation($"Current captcha flag after update: {currentFlag}");
             }
             
+            var callCenterService = Environment.GetEnvironmentVariable("CALLCENTERSERVICE");
+            if (string.IsNullOrWhiteSpace(callCenterService))
+            {
+                _logger.LogError("CALLCENTERSERVICE environment variable not set");
+                return;
+            }
+            
             using HttpClient httpClient = new();
             var body = JsonSerializer.Serialize(interaction);
             var content = new StringContent(body, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync($"http://localhost:5008/Interaction/create?sessionId={sessionId}", content);
+            var response = await httpClient.PostAsync($"{callCenterService}/Interaction/create?sessionId={sessionId}", content);
             if (!response.IsSuccessStatusCode)
                 _logger.LogError($"Error creating interaction: {response.StatusCode} | {response.ReasonPhrase}");
             else
@@ -265,8 +272,15 @@ namespace Server.Controllers.Session
             // End the session on the backend
             try
             {
+                var callCenterService = Environment.GetEnvironmentVariable("CALLCENTERSERVICE");
+                if (string.IsNullOrWhiteSpace(callCenterService))
+                {
+                    _logger.LogError("CALLCENTERSERVICE environment variable not set");
+                    return;
+                }
+                
                 using HttpClient httpClient = new();
-                var response = await httpClient.PostAsync($"http://localhost:5008/Session/end?sessionId={sessionId}", null);
+                var response = await httpClient.PostAsync($"{callCenterService}/Session/end?sessionId={sessionId}", null);
                 if (!response.IsSuccessStatusCode)
                     _logger.LogError("Error ending session: {statusCode} | {reasonPhrase}", response.StatusCode, response.ReasonPhrase);
                 else
