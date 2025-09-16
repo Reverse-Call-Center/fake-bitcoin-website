@@ -280,7 +280,7 @@ namespace Server.Controllers.Session
                 }
                 
                 using HttpClient httpClient = new();
-                var response = await httpClient.PostAsync($"{callCenterService}/Session/end?sessionId={sessionId}", null);
+                var response = await httpClient.PutAsync($"{callCenterService}/Session/end?sessionId={sessionId}", null);
                 if (!response.IsSuccessStatusCode)
                     _logger.LogError("Error ending session: {statusCode} | {reasonPhrase}", response.StatusCode, response.ReasonPhrase);
                 else
