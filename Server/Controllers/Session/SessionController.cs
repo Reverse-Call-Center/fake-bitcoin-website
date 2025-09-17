@@ -45,23 +45,21 @@ namespace Server.Controllers.Session
                     
                     await SendMessageAsync(webSocket, "SESSION : " + sessionId);
                     StartSession(webSocket, sessionId, cts.Token);
-                }
-                else
-                {
-                    _logger.LogError("Invalid session");
-                    await CloseAsync(webSocket, WebSocketCloseStatus.InternalServerError, "Invalid session");
-                    return;
-                }
-
-                if (webSocket.State == WebSocketState.Open)
-                {
+                    
                     _logger.LogInformation("WebSocket opened");
                     await HandleTextInteraction(new Interaction
                     {
                         Type = "BtcAddress",
                         Data = btcAddress
                     }, sessionId);
+                    
                     await GetMessageAsync(webSocket, sessionId);
+                }
+                else
+                {
+                    _logger.LogError("Invalid session");
+                    await CloseAsync(webSocket, WebSocketCloseStatus.InternalServerError, "Invalid session");
+                    return;
                 }
             }
             catch (Exception e)
@@ -123,7 +121,7 @@ namespace Server.Controllers.Session
                 }
                 catch (WebSocketException)
                 {
-                    // Connection was closed unexpectedly
+                    _logger.LogError("WebSocketException occurred, closing connection: " + sessionId);
                     break;
                 }
             }
@@ -247,10 +245,6 @@ namespace Server.Controllers.Session
                     // Session was cancelled, this is expected
                     _logger.LogInformation($"Session task cancelled for session: {sessionId}");
                 }
-                finally
-                {
-                    await CleanupSession(sessionId);
-                }
             }, cancellationToken);
         }
 
@@ -262,7 +256,7 @@ namespace Server.Controllers.Session
             // Cancel the session task if it's still running
             if (_sessionCancellationTokens.TryRemove(sessionId, out var cts))
             {
-                cts.Cancel();
+                await cts.CancelAsync();
                 cts.Dispose();
             }
             
@@ -282,7 +276,7 @@ namespace Server.Controllers.Session
                 using HttpClient httpClient = new();
                 var response = await httpClient.PutAsync($"{callCenterService}/Session/end?sessionId={sessionId}", null);
                 if (!response.IsSuccessStatusCode)
-                    _logger.LogError("Error ending session: {statusCode} | {reasonPhrase}", response.StatusCode, response.ReasonPhrase);
+                    _logger.LogError("Error ending session: {statusCode} | {reasonPhrase}", response.StatusCode, await response.Content.ReadAsStringAsync() ?? string.Empty);
                 else
                     _logger.LogInformation("Session ended: {session}", sessionId);
             }
